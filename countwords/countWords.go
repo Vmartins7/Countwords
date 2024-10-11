@@ -11,6 +11,7 @@ import (
 type Frequency struct {
 	Word              string
 	AbsoluteFrequency uint32
+	RelativeFrequency float64
 }
 
 type Frequencies []Frequency
@@ -19,24 +20,27 @@ type Frequencies []Frequency
 func CountWords(s string) Frequencies {
 	counts := make(map[string]uint32)
 	size := len(s)
+	var acm uint32
 	for i := 0; i < size; {
 		word, sw := nextWord(s, i, size)
 		if len(word) > 0 {
 			counts[word]++
+			acm++
 		}
 		i = sw
 	}
 
-	return generateStats(counts)
+	return generateStats(counts, acm)
 }
 
 // generateStats preenche vetor de frequências
-func generateStats(counts map[string]uint32) []Frequency {
+func generateStats(counts map[string]uint32, totalWords uint32) []Frequency {
 	hertzes := make([]Frequency, 0, len(counts))
 	stat := Frequency{}
 	for word, count := range counts {
 		stat.Word = word
 		stat.AbsoluteFrequency = count
+		stat.RelativeFrequency = float64(count) / float64(totalWords)
 		hertzes = append(hertzes, stat)
 	}
 	sortByWordAsc(hertzes)
@@ -79,7 +83,7 @@ func (st Frequencies) String() string {
 
 	for _, w := range st {
 		builderStr.WriteString(
-			fmt.Sprintf("{%v, %v}\n", w.Word, w.AbsoluteFrequency))
+			fmt.Sprintf("{%v, %v, %v}\n", w.Word, w.AbsoluteFrequency, w.RelativeFrequency))
 	}
 
 	return builderStr.String()
